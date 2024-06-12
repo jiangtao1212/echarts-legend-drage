@@ -22,8 +22,7 @@ import Echarts from "./Echarts.vue";
   gap: 2vh;
 
   .drag {
-    // width: 100%;
-    height: 20vh;
+    height: 30vh;
     .border-radius();
   }
   .echarts-container {
