@@ -24,6 +24,8 @@
 import { reactive, ref } from 'vue';
 import { VueDraggable } from 'vue-draggable-plus';
 
+const emit = defineEmits(['update']);
+
 const dataAbout = reactive({
   reset: [{ name: 'xxx-0', id: '0' }],
   list: [
@@ -73,6 +75,7 @@ const onEnd = (e: any) => {
   } else {
     adjustOrder();
   }
+  emit('update', JSON.parse(JSON.stringify(dataAbout.list))); // 发送更新数据事件
 }
 
 /**
