@@ -1,6 +1,6 @@
 <template>
   <div class="drag-container">
-    <div class="aaa">
+    <div class="main">
       <VueDraggable id="reset-default"
         class="flex justify-center items-center gap-2 p-4 w-100% h-50px bg-gray-500/30 rounded overflow-hidden"
         v-model="dataAbout.reset" :animation="150" :sort="false" ghostClass="ghost" group="people1" :disabled="true"
@@ -10,7 +10,7 @@
       <VueDraggable v-for="(data, index) in dataAbout.list" :key="data.key" v-show="data.value.length > 0"
         class="flex flex-col gap-2 p-4 h-150px bg-gray-500/5 rounded overflow-auto"
         v-model="dataAbout.list[index].value" :animation="150" :sort="false" ghostClass="ghost" group="people"
-        @update="onUpdate" @add="onAdd" @start="onStart" @end="onEnd" @remove="remove" @sort="sore" @move="move" >
+        @update="onUpdate" @add="onAdd" @start="onStart" @end="onEnd" @remove="remove" @sort="sore" @move="move" @change="change">
         <div v-for="item in dataAbout.list[index].value" :key="item.id"
           class="cursor-move h-5 line-height-5 bg-gray-500/5 rounded pl-3 text-3.5">
           {{ item.name }}
@@ -21,7 +21,8 @@
 </template>
 
 <script setup lang="ts">
-import { reactive, ref } from 'vue';
+import { reactive, ref, onMounted, onBeforeUnmount } from 'vue';
+import { useDebounceFn } from "@vueuse/core";
 import { VueDraggable } from 'vue-draggable-plus';
 
 const emit = defineEmits(['update']);
@@ -37,15 +38,21 @@ const dataAbout = reactive({
     { key: '6', value: [{ name: 'Jiang-6', id: '6' }] },
     { key: '7', value: [{ name: 'Tao-7', id: '7' }] },
     { key: '8', value: [{ name: 'Nino-8', id: '8' }] },
-  ]
+  ],
 });
 
+// 数据，非响应式
+const dataConst = {
+  dropEffect: 'move', // 拖动的实时效果
+  dataCache: [], // 缓存数据
+}
+
+function change(e: any) {
+  // console.log('change', e);
+}
 
 function move(e: any) {
   // console.log('move', e);
-  // e.dragged.style.opacity = '0';
-  // return false;
-
 }
 
 function sore(e: any) {
@@ -56,23 +63,51 @@ function sore(e: any) {
 function onUpdate() {
   console.log('update')
 }
+
+// 在拖动元素到另一列表时，将元素添加到最后
 function onAdd(e: any) {
   // console.log('add')
   sortEnd(e);
 }
+
 function remove() {
   // console.log('remove')
 }
 
+// 开始拖动时，缓存数据，为了在拖动结束时还原数据做准备
 const onStart = (e: any) => {
   // console.log('start');
+  dataConst.dataCache = JSON.parse(JSON.stringify(dataAbout.list)); // 深拷贝
 }
-const onEnd = (e: any) => {
-  // console.log('end');
+
+// 延迟函数
+function delay(time = 100) {
+  return new Promise((resolve) => setTimeout(resolve, time));
+}
+
+/**
+ * @description 拖动结束时，进行数据处理
+ * 1.停顿100ms；
+ * 2.判断是否拖动到非可放置区域；
+ *  2.1 是，则还原数据，并且返回；
+ *  2.2 否，往下执行。
+ * 3 判断是否拖动到重置框中；
+ *  3.1 是，则进行重置列表操作；
+ *  3.2 否，则进行排序操作。
+ * 4.发送更新数据事件。
+ * @param e 事件对象
+ */
+const onEnd = async (e: any) => {
+  console.log('end');
   // console.log('end', e);
-  if (dragResetDefaultFlag(e)) {
+  await delay(100); // 停顿100ms，注：这里必须进行停顿，因为此时监听的drag事件中的数据由于使用了防抖函数，可能还未更新到最新数据。（测试下来，这里快了50ms左右，所以这里设置100ms停顿）
+  if (dataConst.dropEffect === 'none') { // 若拖动到非可放置区域，则还原数据
+    dataAbout.list = JSON.parse(JSON.stringify(dataConst.dataCache));
+    return;
+  }
+  if (dragResetDefaultFlag(e)) { // 拖动到重置框中，进行重置列表操作
     resetDefault(e);
-  } else {
+  } else { // 拖动到其他列表中，进行排序操作
     adjustOrder();
   }
   emit('update', JSON.parse(JSON.stringify(dataAbout.list))); // 发送更新数据事件
@@ -136,7 +171,6 @@ const dragResetDefaultFlag = (e: any) => {
   const idArray: Array<string> = ['reset-default', 'reset-default-span'];
   if (!id || !idArray.includes(id)) flag = false; // 没有拖动到重置框中
   return flag;
-
 }
 
 /**
@@ -204,10 +238,33 @@ const resetDefault = (e: any) => {
   console.log(listData);
   dataAbout.list = listData;
 }
+
+/**
+ * @description 监听拖动事件，实时更新dropEffect
+ * 注：这里必须使用防抖函数，否则dropEffect获取的值一直是none。
+ * 原因是e.dataTransfer.dropEffect的值是异步更新的，实际上此时的e值只是{"isTrusted":true}，其他属性还未更新，所以获取的值一直是none。
+ * @param e 事件对象
+ */
+const debouncedFn = useDebounceFn((e: any) => {
+  dataConst.dropEffect = e.dataTransfer.dropEffect;
+  // console.log('dropEffect', e.dataTransfer.dropEffect);
+}, 100);
+
+onMounted(() => {
+  // 监听拖动事件
+  const container: HTMLDivElement = document.querySelector(".drag-container") as HTMLDivElement;
+  container.addEventListener('drag', debouncedFn);
+});
+
+//销毁
+onBeforeUnmount(() => {
+  // 移除拖动事件监听
+  window.removeEventListener('drag', debouncedFn);
+});
 </script>
 
 <style scoped lang="less">
-.aaa {
+.main {
   display: flex;
   justify-content: center;
   flex-wrap: wrap;
