@@ -21,24 +21,33 @@
 </template>
 
 <script setup lang="ts">
-import { reactive, ref, onMounted, onBeforeUnmount } from 'vue';
+import { reactive, ref, onMounted, onBeforeUnmount, watch, watchEffect } from 'vue';
 import { useDebounceFn } from "@vueuse/core";
 import { VueDraggable } from 'vue-draggable-plus';
 
 const emit = defineEmits(['update']);
 
+const props = defineProps({
+  data: {
+    type: Array<string>,
+    default: () => [],
+  },
+});
+
+type valueType = {
+  name: string,
+  id: string,
+}
+
+// 示例数据：{ key: '1', value: [{ name: 'coao-1', id: '1' }] }
+type listDataType = {
+  key: string,
+  value: Array<valueType>,
+}
+
 const dataAbout = reactive({
   reset: [{ name: 'xxx-0', id: '0' }],
-  list: [
-    { key: '1', value: [{ name: 'coao-1', id: '1' }] },
-    { key: '2', value: [{ name: 'Jean-2', id: '2' }] },
-    { key: '3', value: [{ name: 'Johanna-3', id: '3' }] },
-    { key: '4', value: [{ name: 'Juan-4', id: '4' }] },
-    { key: '5', value: [{ name: 'Zhang-5', id: '5' }] },
-    { key: '6', value: [{ name: 'Jiang-6', id: '6' }] },
-    { key: '7', value: [{ name: 'Tao-7', id: '7' }] },
-    { key: '8', value: [{ name: 'Nino-8', id: '8' }] },
-  ],
+  list: [] as Array<listDataType>,
 });
 
 // 数据，非响应式
@@ -249,6 +258,21 @@ const debouncedFn = useDebounceFn((e: any) => {
   dataConst.dropEffect = e.dataTransfer.dropEffect;
   // console.log('dropEffect', e.dataTransfer.dropEffect);
 }, 100);
+
+watch(() => props.data, (newVal, oldVal) => { // TODO: 这里有问题，第二次触发，打印的newVal和oldVal都是同一个数组，原因是父级对数组进行了push操作，并没有改变数组的地址，所以这里虽然会触发watch，但newVal和oldVal都是同一个数组。
+  // 解决方法：在父级使用JSON.stringify()对数组进行赋值，这里数组地址就改变了，newVal和oldVal就不会是同一个数组了。
+  // console.log('watch', newVal, oldVal);
+  if (oldVal.length === 0 && newVal.length > 0) { // 首次添加数据
+    dataAbout.list = newVal.map((item, index) => {
+      return { key: (index + 1).toString(), value: [{ name: item, id: (index + 1).toString() }] };
+    });
+  }
+  if (dataAbout.list.length > 0 && newVal.length === dataAbout.list.length + 1) { // 新增数据，默认加在最后
+    const index = newVal.length;
+    dataAbout.list.push({ key: index.toString(), value: [{ name: newVal[index - 1], id: index.toString() }] });
+  }
+  console.log('dataAbout.list', dataAbout.list);
+}, { deep: true});
 
 onMounted(() => {
   // 监听拖动事件

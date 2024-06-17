@@ -17,7 +17,15 @@ const props = defineProps({
   seriesyAxisIndexData: {
     type: Array<number>,
     default: () => []
-  }
+  },
+  offsetNum: {
+    type: Number,
+    default: 40
+  },
+  gridLeftInit: {
+    type: Number,
+    default: 45
+  },
 });
 
 const refChart = ref();
@@ -35,8 +43,8 @@ const seriesData = [
   [1200, 1220, 1330, 1550, 1630, 1120, 1230, 1340, 1230, 1650, 1200, 1620],
   [226, 259, 290, 264, 287, 2707, 2175.6, 2182.2, 2487, 2188, 260, 223],
 ];
-const offsetNum = 40; // 单个 Y 轴的偏移量，第一个Y轴不偏移
-const gridLeftInit = 45; // 初始 gridLeft 值，只有一个Y轴时，gridLeft的初始值
+const offsetNum = props.offsetNum; // 单个 Y 轴的偏移量，第一个Y轴不偏移
+const gridLeftInit = props.gridLeftInit; // 初始 gridLeft 值，只有一个Y轴时，gridLeft的初始值
 
 const colors = ['#5470C6', '#91CC75', '#EE6666'];
 // 指定图表的配置项和数据
@@ -50,7 +58,7 @@ const option: echarts.EChartsOption = {
   },
   grid: {
     right: '10%',
-    left: 45 + 40 * (seriesData.length - 1),
+    left: gridLeftInit + offsetNum * (seriesData.length - 1),
   },
   toolbox: {
     feature: {
@@ -94,7 +102,7 @@ seriesData.forEach((item, index) => {
       padding: [0, 10, 0, 0]
     },
     position: 'left',
-    offset: index * 40,
+    offset: index * offsetNum,
     alignTicks: true,
     // axisLine: {
     //   show: true,
@@ -119,7 +127,8 @@ const initChart = () => {
   }
 };
 
-const aaa = () => {
+// 重新对option进行修改
+const optionForm = () => {
   // myChart.clear();
   props.legendShowData.forEach((item, index) => {
     // @ts-ignore
@@ -150,7 +159,7 @@ const debouncedFn = useDebounceFn(() => {
 
 // 监听props变化
 watch(() => props.legendShowData, () => {
-  aaa();
+  optionForm();
 }, { deep: true });
 
  // 监听echarts容器宽度变化，重新渲染图表
