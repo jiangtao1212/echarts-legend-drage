@@ -11,8 +11,8 @@
         class="flex flex-col gap-2 p-4 h-150px bg-gray-500/5 rounded overflow-auto"
         v-model="dataAbout.list[index].value" :animation="150" :sort="false" ghostClass="ghost" group="people"
         @update="onUpdate" @add="onAdd" @start="onStart" @end="onEnd" @remove="remove" @sort="sore" @move="move" @change="change">
-        <div v-for="item in dataAbout.list[index].value" :key="item.id"
-          class="cursor-move h-5 line-height-5 bg-gray-500/5 rounded pl-3 text-3.5">
+        <div v-for="item in dataAbout.list[index].value" :key="item.id" @click="onItemClick(item)"
+          class="cursor-move h-5 line-height-5 bg-gray-500/5 rounded p-10px text-3.5 flex justify-center items-center">
           {{ item.name }}
         </div>
       </VueDraggable>
@@ -54,6 +54,11 @@ const dataAbout = reactive({
 const dataConst = {
   dropEffect: 'move', // 拖动的实时效果
   dataCache: [], // 缓存数据
+}
+
+const onItemClick = (item: valueType) => {
+  //TODO: 后期可以增加点击切换显示隐藏legend效果，通过改变series系列的show属性实现
+  // console.log('onItemClick', item);
 }
 
 function change(e: any) {
@@ -271,7 +276,7 @@ watch(() => props.data, (newVal, oldVal) => { // TODO: 这里有问题，第二�
     const index = newVal.length;
     dataAbout.list.push({ key: index.toString(), value: [{ name: newVal[index - 1], id: index.toString() }] });
   }
-  console.log('dataAbout.list', dataAbout.list);
+  // console.log('dataAbout.list', dataAbout.list);
 }, { deep: true});
 
 onMounted(() => {

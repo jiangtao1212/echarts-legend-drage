@@ -5,7 +5,7 @@
 </template>
 
 <script setup lang='ts'>
-import { onMounted, nextTick, ref, onBeforeUnmount, watch } from "vue";
+import { onMounted, nextTick, ref, onBeforeUnmount, watch, toRef } from "vue";
 import { useElementSize, useDebounceFn } from "@vueuse/core";
 import * as echarts from "echarts";
 
