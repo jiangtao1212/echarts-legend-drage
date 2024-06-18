@@ -15,4 +15,4 @@ This template should help get you started developing with Vue 3 in Vite.
 
 * 3.视频演示
 
-<video src="./demo2.mp4" autoplay="true" controls="controls" ></video>
+<video src="./demo2-1.mp4" autoplay="true" controls="controls" ></video>
