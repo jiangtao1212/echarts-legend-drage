@@ -12,3 +12,7 @@ This template should help get you started developing with Vue 3 in Vite.
 * 2.添加新增功能，模拟series系列数据动态新增
 
 ![demo](./demo1.gif)
+
+* 3.视频演示
+
+<video src="./demo2.mp4" autoplay="true" controls="controls" ></video>
