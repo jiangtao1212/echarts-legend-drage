@@ -8,7 +8,8 @@
         <span id="reset-default-span">Reset Default</span>
       </VueDraggable>
       <VueDraggable v-for="(data, index) in dataAbout.list" :key="data.key" v-show="data.value.length > 0"
-        class="flex flex-col gap-2 p-4 h-150px bg-gray-500/5 rounded overflow-auto"
+        class="flex flex-col gap-2 p-10px  bg-gray-500/5 rounded"
+        :style="{height: data.value.length * 20 + (data.value.length - 1) * 8 + 20 + 'px'}"
         v-model="dataAbout.list[index].value" :animation="150" :sort="false" ghostClass="ghost" group="people"
         @update="onUpdate" @add="onAdd" @start="onStart" @end="onEnd" @remove="remove" @sort="sore" @move="move" @change="change">
         <div v-for="item in dataAbout.list[index].value" :key="item.id" @click="onItemClick(item)"
@@ -78,7 +79,6 @@ function onUpdate() {
   console.log('update')
 }
 
-
 function onAdd(e: any) {
   // console.log('add')
 }
@@ -124,7 +124,6 @@ const onEnd = async (e: any) => {
     sortEnd(e);
     adjustOrder();
   }
-  console.log('emit', JSON.parse(JSON.stringify(dataAbout.list)));
   emit('update', JSON.parse(JSON.stringify(dataAbout.list))); // 发送更新数据事件
 }
 
@@ -135,7 +134,7 @@ const onEnd = async (e: any) => {
  * 因此，这里在onEnd中进行排序。
  * @param e 事件对象
  */
-const sortEnd = (e: any) => {
+ const sortEnd = (e: any) => {
   // console.group('sortEnd');
   const listData: Array<any> = JSON.parse(JSON.stringify(dataAbout.list)); // 深拷贝
   // console.log('JSON.stringify(dataAbout.list)', JSON.stringify(dataAbout.list));
@@ -166,7 +165,7 @@ const sortEnd = (e: any) => {
  * 调整顺序，确保列表中的第一个元素和默认列表是对应的。
  * 例如：[{ name: 'xxx-2', id: '2' }, { name: 'xxx-1', id: '1' }]列表，该列表就应该在总list数组中的第二个位置
  */
-const adjustOrder = () => {
+ const adjustOrder = () => {
   // 注意：这里需要拷贝两次，然后整理最终的数据，再赋值给dataAbout.list，
   //（先循环清空响应式数据，再循环赋值会导致顺序出现问题，原因是两个for循环同时执行，响应式数据渲染出现问题）
   // 猜测v-if可能会解决这个问题，没有尝试，因为在这里v-if和v-for在一起使用会有问题，同时频繁的v-if切换会影响性能

@@ -12,7 +12,7 @@
 
 <script setup lang='ts'>
 import { ref, reactive, onMounted, onBeforeMount } from 'vue';
-import Drag from "./Drag.vue";
+import Drag from "./Drag copy.vue";
 import { type EChartsOption, type EChartsType } from "echarts";
 
 import Echarts from "./Echartscopy copy.vue";
@@ -69,7 +69,7 @@ const seriesData = [
 
 // 拖拽更新数据
 const update = (data: Array<any>) => {
-  // console.log('update');
+  console.log('update', data);
   const legendShowData = data.map(item => item.value.length > 0); // 只有当有数据时才显示图例
   const seriesyAxisIndexData = new Array(data.length).fill(0);
   data.forEach((item, index) => {
