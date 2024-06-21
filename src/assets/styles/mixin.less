@@ -16,7 +16,7 @@
   transform: translate(-50%, -50%);
 }
 
-.border-radius (@radius: 5px) {
-  border: 1px solid red;
+.border-radius (@radius: 5px, @color: red) {
+  border: 1px solid @color;
   border-radius: @radius;
 }
