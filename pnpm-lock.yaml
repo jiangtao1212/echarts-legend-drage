@@ -1,6 +1,7 @@
 lockfileVersion: 5.4
 
 specifiers:
+  '@element-plus/icons-vue': ^2.3.1
   '@rushstack/eslint-patch': ^1.8.0
   '@tsconfig/node20': ^20.1.4
   '@types/node': ^20.12.5
@@ -24,6 +25,7 @@ specifiers:
   vue-tsc: ^2.0.11
 
 dependencies:
+  '@element-plus/icons-vue': 2.3.1_vue@3.4.27
   '@vueuse/core': 10.10.0_vue@3.4.27
   echarts: 5.5.0
   element-plus: 2.7.4_vue@3.4.27
