@@ -13,5 +13,11 @@ const upload = (files: File[]) => {
 
 <template>
     <!-- <EchartsDrag /> -->
-    <Upload @upload="upload" class="ml-auto mr-auto mt-1rem" />
+    <Upload @upload="upload"/>
 </template>
+
+<style scoped lang="less">
+.upload-container {
+  margin: 10px auto 0;
+}
+</style>

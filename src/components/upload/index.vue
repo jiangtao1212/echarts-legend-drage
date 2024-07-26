@@ -6,42 +6,69 @@
       </el-icon>
       将文件或文件夹拖到此处
     </p>
-    <p class="drag-text">支持的文件类型：.jpg | .jpeg | .bmp | .webp | .gif | .png</p>
-    <p class="drag-text">每个文件允许的最大尺寸：2M</p>
-    <p class="drag-text">
+    <p class="drag-text">支持的文件类型：{{ dataAbout.fileTypesTitle }}</p>
+    <p class="drag-text">每个文件允许的最大尺寸：{{ dataAbout.maxFileSize }}</p>
+    <p class="drag-text" v-if="showFileUploadBtn || showDirectoryUploadBtn">
       <span>点击</span>
-      <label for="upload-files">上传文件</label>
-      <input id="upload-files" type="file" style="display: none" multiple accept=".jpg,.jpeg,.bmp,.webp,.gif,.png" />
+      <label v-if="showFileUploadBtn" for="upload-files">上传文件</label>
+      <input id="upload-files" type="file" style="display: none" multiple accept="dataAbout.accept" />
 
-      <span>或</span>
+      <span v-if="showFileUploadBtn && showDirectoryUploadBtn">或</span>
 
-      <label for="upload-directories">上传文件夹</label>
+      <label v-if="showDirectoryUploadBtn" for="upload-directories">上传文件夹</label>
       <input id="upload-directories" type="file" style="display: none" multiple webkitdirectory mozdirectory odirectory
-        directory />
+        directory :accept="dataAbout.accept" />
     </p>
   </div>
 </template>
 
 <script setup lang="ts">
 import { Upload } from "@element-plus/icons-vue";
-import { onMounted, onUnmounted } from "vue";
+import { computed, onMounted, onUnmounted, reactive } from "vue";
+import { ElMessage } from 'element-plus'
+import { fileTypeEntry } from "@/utils/index";
 
 const emits = defineEmits(["upload"]);
+
+// 定义props类型
+type Props = {
+  fileTypes?: Array<string>, // 允许上传的文件类型
+  maxFileSize?: number , // 允许上传的文件最大尺寸，单位：字节
+  showFileUploadBtn?: boolean, // 是否显示上传文件按钮
+  showDirectoryUploadBtn?: boolean, // 是否显示上传文件夹按钮
+}
+const props = withDefaults(defineProps<Props>(), {
+  fileTypes: () => ['jpg', 'jpeg', 'bmp', 'webp', 'gif', 'png'],
+  maxFileSize: 2 * 1024 * 1024, // 2M
+  showFileUploadBtn: true, 
+  showDirectoryUploadBtn: true,
+});
+
+// 数据相关
+const dataAbout = reactive({
+  accept: fileTypeEntry.fileTypesInputAcceptStr(props.fileTypes),
+  fileTypesTitle: fileTypeEntry.fileTypesSeparatorStr(props.fileTypes, ' | '),
+  maxFileSize: fileTypeEntry.fileSizeToUnit(props.maxFileSize), // 单位：MB
+});
 
 let dragContainer: HTMLDivElement | null = null; // 拖拽区域
 let uploadFilesBtn: Element | null = null; // 上传文件按钮
 let uploadDirectoriesBtn: Element | null = null; // 上传文件夹按钮
 
-// 获取文件--按钮点击事件
-const getFiles = (e: Event) => {
-  const files = (e.target as HTMLInputElement).files;
-  console.log(files);
+// 过滤文件大小超过限制的文件
+const filterOverMaxFileSize = (files: File[]) => {
+  const res = files.filter(file => file.size <= props.maxFileSize);
+  const message = `上传了${files.length}个文件，过滤后符合文件大小要求的为${res.length}个文件`
+  ElMessage.success(message);
+  return res;
 }
 
-// 获取文件夹中的所有文件--按钮点击事件
-const getDirectories = (e: Event) => {
-  const files = (e.target as HTMLInputElement).files;
-  console.log(files);
+// 获取文件 或 文件夹中的所有文件--按钮点击事件
+const getFilesOrDirectories = (e: Event) => {
+  let files = (e.target as HTMLInputElement).files;
+  if (!files || files?.length === 0) return;
+  const filesData: File[] = filterOverMaxFileSize(Array.from(files));
+  console.log(filesData);
 }
 
 // 异步获取文件夹中的所有文件----迭代器
@@ -101,8 +128,9 @@ const getDragfilesAndDirectories = async (e: DragEvent) => {
     }
   }
   await Promise.all(promises);
-  console.log("All files processed:", filesArray);
-  emits('upload', filesArray);
+  const filesData = filterOverMaxFileSize(Array.from(filesArray));
+  console.log("All files processed:", filesData);
+  emits('upload', filesData);
 }
 
 // 初始化文件或文件夹拖拽事件监听
@@ -125,17 +153,17 @@ const initDragListener = () => {
 
 onMounted(() => {
   uploadFilesBtn = document.querySelector("#upload-files");
-  uploadFilesBtn?.addEventListener("change", getFiles);
+  uploadFilesBtn?.addEventListener("change", getFilesOrDirectories);
 
   uploadDirectoriesBtn = document.querySelector("#upload-directories");
-  uploadDirectoriesBtn?.addEventListener("change", getDirectories);
+  uploadDirectoriesBtn?.addEventListener("change", getFilesOrDirectories);
 
   initDragListener();
 });
 
 onUnmounted(() => {
-  uploadFilesBtn?.removeEventListener("change", getFiles);
-  uploadDirectoriesBtn?.removeEventListener("change", getDirectories);
+  uploadFilesBtn?.removeEventListener("change", getFilesOrDirectories);
+  uploadDirectoriesBtn?.removeEventListener("change", getFilesOrDirectories);
   dragContainer?.removeEventListener("drop", getDragfilesAndDirectories);
 });
 </script>
