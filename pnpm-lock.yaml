@@ -1,6 +1,9 @@
 lockfileVersion: 5.4
 
 specifiers:
+  '@baosight/mplat-style': ^0.9.0
+  '@baosight/vue-files-upload': ^0.0.5
+  '@baosight/warn-draw': ^1.0.2
   '@element-plus/icons-vue': ^2.3.1
   '@rushstack/eslint-patch': ^1.8.0
   '@tsconfig/node20': ^20.1.4
@@ -25,6 +28,9 @@ specifiers:
   vue-tsc: ^2.0.11
 
 dependencies:
+  '@baosight/mplat-style': 0.9.0_typescript@5.4.5
+  '@baosight/vue-files-upload': 0.0.5_typescript@5.4.5
+  '@baosight/warn-draw': 1.0.2_typescript@5.4.5
   '@element-plus/icons-vue': 2.3.1_vue@3.4.27
   '@vueuse/core': 10.10.0_vue@3.4.27
   echarts: 5.5.0
@@ -430,6 +436,45 @@ packages:
       '@babel/helper-validator-identifier': 7.24.7
       to-fast-properties: 2.0.0
     dev: true
+
+  /@baosight/mplat-style/0.9.0_typescript@5.4.5:
+    resolution: {integrity: sha512-bUYBIo6TSbHWpaTI0QWvJqOj7LjuWjMQBAPYLdDW207SE2Ijgui1dT/9WjjQbgrQGQU/Gl9dROqiEowhnSTRqg==}
+    dependencies:
+      '@element-plus/icons-vue': 2.3.1_vue@3.4.27
+      element-plus: 2.7.4_vue@3.4.27
+      vue: 3.4.27_typescript@5.4.5
+      vue-router: 4.3.2_vue@3.4.27
+    transitivePeerDependencies:
+      - '@vue/composition-api'
+      - typescript
+    dev: false
+
+  /@baosight/vue-files-upload/0.0.5_typescript@5.4.5:
+    resolution: {integrity: sha512-SIX2qoeQ0ZY0QmpnbjEuwuLfyJR25Jpw2+JP9H1nMe94NnUQD5bT86WtdyrZXCu9CiSD5+Vqj2rlXrSTs8rGkg==}
+    dependencies:
+      '@element-plus/icons-vue': 2.3.1_vue@3.4.27
+      '@vueuse/core': 10.10.0_vue@3.4.27
+      element-plus: 2.7.4_vue@3.4.27
+      pinia: 2.1.7_lku3umiefploqzvdryeqiyorrq
+      vue: 3.4.27_typescript@5.4.5
+      vue-router: 4.3.2_vue@3.4.27
+    transitivePeerDependencies:
+      - '@vue/composition-api'
+      - typescript
+    dev: false
+
+  /@baosight/warn-draw/1.0.2_typescript@5.4.5:
+    resolution: {integrity: sha512-TO9PZLfAIip5UUCPME8DA/zGMw5XR9NcPEyeqpbFwtxANfrL00PhoOlHzEyAM0sKQs8pUVPCQaTfBmAd7D8mHQ==}
+    dependencies:
+      '@element-plus/icons-vue': 2.3.1_vue@3.4.27
+      element-plus: 2.7.4_vue@3.4.27
+      pinia: 2.1.7_lku3umiefploqzvdryeqiyorrq
+      vue: 3.4.27_typescript@5.4.5
+      vue-router: 4.3.2_vue@3.4.27
+    transitivePeerDependencies:
+      - '@vue/composition-api'
+      - typescript
+    dev: false
 
   /@ctrl/tinycolor/3.6.1:
     resolution: {integrity: sha512-SITSV6aIXsuVNV3f3O0f2n/cgyEDWoSqtZMYiAmcsYHydcKrOz3gUxB/iXd/Qf08+IZX4KpgNbvUdMBmWz+kcA==}
