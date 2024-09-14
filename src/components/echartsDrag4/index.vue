@@ -14,7 +14,7 @@
 
 <script setup lang='ts'>
 import { ref, reactive, onMounted, onBeforeMount } from 'vue';
-import Drag from "./Drag.vue";
+import Drag from "./drag/index.vue";
 import { type EChartsOption, type EChartsType } from "echarts";
 import Echarts from "./Echarts.vue";
 

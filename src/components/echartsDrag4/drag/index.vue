@@ -10,16 +10,16 @@
         <div v-for="item in dataAbout.list[index].value" :key="item.id"
           class="cursor-move h-5 line-height-5 bg-gray-500/5 rounded pl-5px pr-5px text-2.5 flex justify-center items-center"
           :class="item.isShow ? '' : 'vague'" @contextmenu.prevent="clickObjFun.handleContextMenu($event, item.id)">
-          <el-popover placement="right" :width="100"
-            :popper-style="{ 'min-width': '100px', 'display': dataAbout.visible === item.id ? 'block' : 'none' }"
+          <el-popover placement="right" :width="80"
+            :popper-style="{ 'min-width': '80px', 'display': dataAbout.visible === item.id ? 'block' : 'none' }"
             trigger="contextmenu">
             <template #reference>
               <span class="cursor-move-item" :style="{ 'color': colors[(+item.id - 1) % colors.length] }">
                 {{ item.name }}</span>
             </template>
             <div class="flex flex-col justify-center items-center gap-1 ">
-              <el-button type="primary" size="default" @click="clickObjFun.deleteItemDefault(item.id)">移除</el-button>
-              <el-button type="primary" size="default" class="!ml-0"
+              <el-button type="primary" size="small" @click="clickObjFun.deleteItemDefault(item.id)">移除</el-button>
+              <el-button type="primary" size="small" class="!ml-0"
                 @click="clickObjFun.resetItemDefault(item.name)">重置</el-button>
             </div>
           </el-popover>
