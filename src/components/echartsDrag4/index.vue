@@ -3,7 +3,7 @@
     <input type="button" class="add-btn" @click="addBtnClick" value="add legend" />
     <div class="content">
       <div class="drag">
-        <Drag :data="dataAbout.legendData" @update="update" @delete-item="deleteItem" />
+        <Drag :data="['A1', 'B2', 'C3', 'D4', 'E5', 'F6', 'G7', 'H8']" @update="update" @delete-item="deleteItem" />
       </div>
       <Echarts ref="echartsRef" id="echarts-container" :option="dataAbout.option" :yAxisShowData="dataAbout.yAxisShowData"
         :gridTopInit="top" :seriesOpacityData="dataAbout.seriesOpacityData"
