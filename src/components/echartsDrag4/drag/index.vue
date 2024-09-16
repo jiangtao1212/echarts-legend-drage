@@ -1,22 +1,25 @@
 <template>
   <div class="drag-container">
-    <div class="main">
+    <div class="main" :class="id">
       <VueDraggable v-for="(data, index) in dataAbout.list" :key="data.key" v-show="data.value.length > 0"
-        class="flex flex-col gap-1  bg-gray-500/5 rounded drag-column"
+        class="flex flex-col items-start gap-1 drag-column"
         :data-info="data.value.length > 0 ? data.value[0].name : ''"
         :style="{ height: data.value.length * 20 + (data.value.length - 1) * 4 + 'px', minwidth: '20px' }"
         v-model="dataAbout.list[index].value" :animation="150" :sort="false" ghostClass="ghost" :group="group"
         @update="onUpdate" @add="onAdd" @start="onStart" @end="onEnd" @remove="remove" @sort="sore" @move="move"
         @change="change">
         <div v-for="item in dataAbout.list[index].value" :key="item.id"
-          class="cursor-move h-5 line-height-5 bg-gray-500/5 rounded pl-5px pr-5px text-2.7 flex justify-center items-center"
+          class="cursor-move h-5 line-height-5 pl-3px pr-3px border-rd-1 text-2.7 flex justify-center items-center"
           :class="item.isShow ? '' : 'vague'" @contextmenu.prevent="clickObjFun.handleContextMenu($event, item.id)">
           <el-popover placement="right" :width="80"
             :popper-style="{ 'min-width': '80px', 'display': dataAbout.visible === item.id ? 'block' : 'none' }"
             trigger="contextmenu">
             <template #reference>
-              <span class="cursor-move-item" :style="{ 'color': colors[(+item.id - 1) % colors.length] }">
-                {{ item.name }}</span>
+              <div class="flex justify-center items-center gap-1" :class="{ 'dark': theme === 'dark' }"
+                :style="{ '--color': colors[(+item.id - 1) % colors.length] }">
+                <div class="w-6 h-2px line" style="--height: 1.5rem;"></div>
+                <span class="cursor-move-item">{{ item.name }}</span>
+              </div>
             </template>
             <div class="flex flex-col justify-center items-center gap-1 ">
               <el-button type="primary" size="small" @click="clickObjFun.deleteItemDefault(item.id)">移除</el-button>
@@ -43,6 +46,10 @@ const props = defineProps({
     type: Array<string>,
     default: () => [],
   },
+  id: {
+    type: String,
+    default: '',
+  },
   colors: {
     type: Array<string>,
     default: ['#0078FF', '#FFAA2E', '#00FF00', '#9D2EFF', '#DA1D80', '#DA4127'],
@@ -50,7 +57,11 @@ const props = defineProps({
   group: {
     type: String,
     default: 'people',
-  }
+  },
+  theme: {
+    type: String,
+    default: 'light',
+  },
 });
 
 // 响应式数据
@@ -362,39 +373,58 @@ const debouncedFn = useDebounceFn((e: any) => {
   // console.log('dropEffect', e.dataTransfer.dropEffect);
 }, 100);
 
-// 初始化事件监听
-const initEventListeners = () => {
-  const main = document.querySelector(".main") as HTMLDivElement;
-
-  // 处理子项点击逻辑 -- 点击切换显示隐藏legend效果
-  const handleItemClick = (data: Array<DragListDataType>, selectedItem: string) => {
-    const dataOrigin = data;
-    outer: for (let i = 0; i < dataOrigin.length; i++) {
-      const itemArray = dataOrigin[i].value;
-      for (let j = 0; j < itemArray.length; j++) {
-        if (itemArray[j].name === selectedItem) {
-          if (j === 0) { // 点击的元素是当前列中第一个，隐藏当前列
-            const isShow = !dataOrigin[i].value[j].isShow;
-            dataOrigin[i].value.forEach(item => item.isShow = isShow);
-          } else { // 点击的元素不是当前列中第一个，只隐藏当前元素
-            itemArray[j].isShow = !itemArray[j].isShow;
-          }
-          break outer;
+// 处理子项点击逻辑 -- 点击切换显示隐藏legend效果
+const handleItemClick = (data: Array<DragListDataType>, selectedItem: string) => {
+  const dataOrigin = data;
+  outer: for (let i = 0; i < dataOrigin.length; i++) {
+    const itemArray = dataOrigin[i].value;
+    for (let j = 0; j < itemArray.length; j++) {
+      if (itemArray[j].name === selectedItem) {
+        if (j === 0) { // 点击的元素是当前列中第一个，隐藏当前列
+          const isShow = !dataOrigin[i].value[j].isShow;
+          dataOrigin[i].value.forEach(item => item.isShow = isShow);
+        } else { // 点击的元素不是当前列中第一个，只隐藏当前元素
+          itemArray[j].isShow = !itemArray[j].isShow;
         }
+        break outer;
       }
     }
-    return JSON.parse(JSON.stringify(dataOrigin));
   }
-
-  // 监听鼠标点击事件--点击切换显示隐藏legend效果，通过改变series系列的show属性实现
-  main.addEventListener('click', (e: any) => {
-    if (!e.target.classList.contains('cursor-move') && !e.target.classList.contains('cursor-move-item')) return;
-    console.log('click点击了子级元素:', e.target.textContent);
-    const text = e.target.textContent;
-    const handleData = handleItemClick(dataAbout.list, text);
-    emit('update', handleData);
-  });
+  return JSON.parse(JSON.stringify(dataOrigin));
 }
+
+const handleItemClickFun = (e: any) => {
+  console.log('click', e);
+  console.log('click', e.target);
+  if (!e.target.classList.contains('cursor-move') && !e.target.classList.contains('cursor-move-item')) return;
+  console.log('click点击了子级元素:', e.target.textContent);
+  const text = e.target.textContent;
+  const handleData = handleItemClick(dataAbout.list, text);
+  emit('update', handleData);
+}
+
+// 初始化事件监听
+const initEventListeners = () => {
+  // 1.监听拖动事件
+  const container: HTMLDivElement = document.querySelector(".drag-container") as HTMLDivElement;
+  container.addEventListener('drag', debouncedFn);
+  // 2.监听鼠标点击事件--点击切换显示隐藏legend效果，通过改变series系列的show属性实现
+  const selectors = props.id ? `.${props.id}.main` : '.main';
+  const main = document.querySelector(selectors) as HTMLDivElement;
+  main.addEventListener('click', handleItemClickFun);
+}
+
+// 移除事件监听
+const removeEventListener = () => {
+  // 1.移除拖动事件监听
+  const container: HTMLDivElement = document.querySelector(".drag-container") as HTMLDivElement;
+  container.removeEventListener('drag', debouncedFn);
+  // 2.移除鼠标点击事件--点击切换显示隐藏legend效果
+  const selectors = props.id ? `.${props.id}.main` : '.main';
+  const main = document.querySelector(selectors) as HTMLDivElement;
+  main.removeEventListener('click', handleItemClickFun);
+}
+
 
 // 获取所有数据 --- 导出方法
 const getAllData = (): Array<DragListDataType> => {
@@ -423,17 +453,12 @@ watch(() => props.data, (newVal, oldVal) => { // TAG: 这里有问题，第二�
 }, { deep: true, immediate: true });
 
 onMounted(() => {
-  // 监听拖动事件
-  const container: HTMLDivElement = document.querySelector(".drag-container") as HTMLDivElement;
-  container.addEventListener('drag', debouncedFn);
-
   initEventListeners();
 });
 
 //销毁
 onBeforeUnmount(() => {
-  // 移除拖动事件监听
-  window.removeEventListener('drag', debouncedFn);
+  removeEventListener();
 });
 </script>
 
@@ -456,6 +481,7 @@ onBeforeUnmount(() => {
     display: block;
     width: 100%;
     height: 100%;
+    // padding-left: 0 17px;
     margin-top: -20px;
     opacity: 0;
     z-index: 1;
@@ -470,6 +496,40 @@ onBeforeUnmount(() => {
 
     &.vague {
       opacity: 0.5;
+    }
+
+    .line {
+      background-color: var(--color);
+      position: relative;
+    }
+
+    .line::after {
+      content: "";
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 50%;
+      height: calc(var(--height) / 2);
+      border-radius: 50%;
+      border: 2px solid var(--color);
+      background-color: #FFFFFF;
+    }
+
+    .dark .line::after {
+      background-color: var(--color);
+    }
+
+    .cursor-move-item {
+      color: #333;
+      font-size: 12px;
+      font-weight: 450;
+      font-family: Arial, sans-serif;
+      background-color: transparent;
+    }
+
+    .dark .cursor-move-item {
+      color: #EDF0F9;
     }
   }
 }
