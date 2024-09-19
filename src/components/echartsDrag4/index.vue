@@ -3,7 +3,7 @@
     <input type="button" class="add-btn" @click="addBtnClick" value="add legend" />
     <div class="content">
       <div class="drag">
-        <Drag :data="['A1', 'B2', 'C3', 'D4', 'E5', 'F6', 'G7', 'H8']" @update="update" @delete-item="deleteItem" />
+        <Drag :data="dataAbout.dragData" @update="update" @delete-item="deleteItem" />
       </div>
       <Echarts ref="echartsRef" id="echarts-container" :option="dataAbout.option" :yAxisShowData="dataAbout.yAxisShowData"
         :gridTopInit="top" :seriesOpacityData="dataAbout.seriesOpacityData"
@@ -15,6 +15,7 @@
 <script setup lang='ts'>
 import { ref, reactive, onMounted, onBeforeMount } from 'vue';
 import Drag from "./drag/index.vue";
+import { type DragItemDataProps} from "./drag/type/index";
 import { type EChartsOption, type EChartsType } from "echarts";
 import Echarts from "./Echarts.vue";
 
@@ -63,6 +64,16 @@ const dataAbout = reactive({
     series: []
   } as EChartsOption,
   max: 2, // 各个列表中的数量最大值,设置固定高度
+  dragData: [
+    {name: 'A1', isDrag: true}, 
+    {name: 'B2', isDrag: true},
+    {name: 'C3', isDrag: true},
+    {name: 'D4', isDrag: true},
+    {name: 'E5', isDrag: true},
+    {name: 'F6', isDrag: true},
+    {name: 'G7', isDrag: true},
+    {name: 'H8', isDrag: true},
+  ] as Array<DragItemDataProps>,
 });
 const legendData = ['A1', 'B2', 'C3', 'D4', 'E5', 'F6', 'G7', 'H8'];
 const seriesData = [
